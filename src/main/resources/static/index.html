@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Certificate Generator</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .container {
+            width: 350px;
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            text-align: center;
+            color: white;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #ff7a18;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #ff512f;
+        }
+
+        .download {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>🎓 Certificate Generator</h2>
+
+    <input type="text" id="name" placeholder="Enter Name">
+    <input type="text" id="role" placeholder="Enter Role">
+    <input type="text" id="event" placeholder="Enter Event">
+
+    <button onclick="generate()">Generate Certificate</button>
+
+    <div class="download">
+        <h3>⬇ Download Certificate</h3>
+
+        <input type="text" id="certId" placeholder="Enter Certificate ID">
+        <button onclick="download()">Download</button>
+    </div>
+
+</div>
+
+<script>
+
+function generate() {
+    const name = document.getElementById("name").value;
+    const role = document.getElementById("role").value;
+    const event = document.getElementById("event").value;
+
+    if (!name || !role || !event) {
+        alert("⚠ Fill all fields");
+        return;
+    }
+
+    const data = {
+        candidateName: name,
+        role: role,
+        eventName: event
+    };
+
+    fetch("http://localhost:8080/api/certificates", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(result => {
+
+        const id = result.certificateId || result.id;
+
+        // ✅ फक्त ID generate
+        alert("✅ Certificate Generated! ID: " + id);
+
+        // ✅ input मध्ये fill
+        document.getElementById("certId").value = id;
+
+        // ❌ IMPORTANT: इथे certificate open नाही करायचं
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ Error generating certificate");
+    });
+}
+
+function download() {
+    const id = document.getElementById("certId").value;
+
+    if (!id) {
+        alert("Enter ID first");
+        return;
+    }
+
+    window.open("http://localhost:8080/certificate/" + id, "_blank");
+}
+
+</script>
+
+</body>
+</html>
